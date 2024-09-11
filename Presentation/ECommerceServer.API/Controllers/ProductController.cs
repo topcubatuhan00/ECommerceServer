@@ -18,7 +18,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async void Get()
+    public async Task Get()
     {
         await _productWriteRepository.AddRangeAsync(new()
         {
@@ -28,5 +28,12 @@ public class ProductController : ControllerBase
         });
 
         await _productWriteRepository.SaveAsync();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(string id)
+    {
+        var data = await _productReadRepository.GetByIdAsync(id);
+        return Ok(data);
     }
 }

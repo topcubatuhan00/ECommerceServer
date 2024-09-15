@@ -1,7 +1,9 @@
 ﻿using ECommerceServer.Application.Repositories.ProductRepositories;
 using ECommerceServer.Application.Repositories.Repositories;
+using ECommerceServer.Application.RequestParameters;
 using ECommerceServer.Application.ViewModels.ProductModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace ECommerceServer.API.Controllers;
@@ -24,10 +26,19 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery]Pagination pagination)
     {
-        var data = _productReadRepository.GetAll(false);
-        return Ok(data);
+        var totalCount = await _productReadRepository.GetAll(false).CountAsync();
+        var data = _productReadRepository.GetAll(false).Skip(pagination.Size* pagination.Page).Take(pagination.Size).Select(p => new
+        {
+            p.Id,
+            p.Name,
+            p.Stock,
+            p.Price,
+            p.CreatedDate,
+            p.UpdatedDate
+        });
+        return Ok(new { totalCount, data });
     }
 
     [HttpGet("{id}")]
